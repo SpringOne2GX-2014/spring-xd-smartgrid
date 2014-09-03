@@ -1,4 +1,4 @@
-# cd into the springxd-smartgrid-demo/smartgrid-prediction dir:
+# cd into the springxd-smartgrid-demo/prediction dir:
 #setwd('xxxxx')
 
 require(pmml)
