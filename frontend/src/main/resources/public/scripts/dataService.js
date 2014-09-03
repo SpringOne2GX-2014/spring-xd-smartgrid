@@ -86,6 +86,8 @@ function createDataService() {
                     currentPredictionTimeSeries.data = currentPredictionTimeSeries.data.concat(newPredictionDataPoints);
                 }
             }
+            
+            
 
             for (var i = 0; i < observers.length; i++) {
                 var observer = observers[i];

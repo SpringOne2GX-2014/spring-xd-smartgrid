@@ -67,6 +67,7 @@ function createLoadDistributionChart() {
 
             bar.append("text")
                 .attr("x", 2)
+                .attr("class","load-distribution-bar-label")
                 .attr("y", barHeight / 2)
                 .attr("dy", ".35em")
                 .text(function (d) {

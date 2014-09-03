@@ -6,7 +6,7 @@ as well as the actual and predicted energy consumption by house.
 It accesses data from aggregate-counters via the REST interface provided by Spring XD.
 
 Screenshot:
-![smartgird-ui](/smartgrid-frontend/smartgrid-ui.png)
+![ui](/frontend/ui.png)
 
 
 Preparation

@@ -24,18 +24,8 @@ function createLoadChart() {
             // Scales and axes. Note the inverted domain for the y-scale: bigger is up!
             x = d3.time.scale().range([0, width]);
             y = d3.scale.linear().range([height, 0]);
-            xAxis = d3.svg.axis().scale(x).tickSize(-height).tickSubdivide(true);
+            xAxis = d3.svg.axis().scale(x).ticks(6).tickFormat(d3.time.format("%H:%M"));
             yAxis = d3.svg.axis().scale(y).ticks(10).orient("left");
-
-            area = d3.svg.area()
-                .interpolate("basis")
-                .x(function (d) {
-                    return x(d.ts);
-                })
-                .y0(height)
-                .y1(function (d) {
-                    return y(d.value);
-                });
 
             line = d3.svg.line()
                 .interpolate("basis")
@@ -92,17 +82,17 @@ function createLoadChart() {
                 var svg = d3.select(selector).transition();
 
                 svg.select(".x.axis") // change the x axis
-                    .duration(750)
+                    .duration(0)
                     .call(xAxis);
                 svg.select(".y.axis") // change the y axis
-                    .duration(750)
+                    .duration(0)
                     .call(yAxis);
 
                 svg.select(".line.actual")
-                    .duration(750)
+                    .duration(0)
                     .attr("d", [line(actual)]);
                 svg.select(".line.prediction")
-                    .duration(750)
+                    .duration(0)
                     .attr("d", [line(prediction)]);
 
                 return;

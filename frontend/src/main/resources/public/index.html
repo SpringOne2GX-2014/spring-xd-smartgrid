@@ -63,7 +63,7 @@
                     <!---->
                 </table>
 
-                <h4>Load Distribution</h4>
+                <h4>DISTRIBUTION</h4>
 
                 <div class='chart-container text-center'>
                     <svg class='smart-grid-load-distribution-chart'></svg>
@@ -71,29 +71,33 @@
             </div>
 
             <div id='grid' class='col-xs-8'>
-                <h4><span class='text-left'>Load</span><span class="pull-right today"></span></h4>
+                <h4><span class='text-left'>LOAD</span><span class="pull-right today"></span></h4>
+                <div class='bar'>
+                  <div class="dropdown">
+                      <button id='selected-house' class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                              data-toggle="dropdown">
+                          Grid
+                          <span class="caret"></span>
+                      </button>
 
-                <div class="dropdown">
-                    <button id='selected-house' class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
-                            data-toggle="dropdown">
-                        Grid
-                        <span class="caret"></span>
-                    </button>
-
-
-                    <ul id='house-filter' class="dropdown-menu scrollable-menu" role="menu">
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Grid</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 1 *</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 2</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 3</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 4</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 5</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 6</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 7</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 8</a></li>
-                        <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 9</a></li>
-                    </ul>
-
+                      <ul id='house-filter' class="dropdown-menu scrollable-menu" role="menu">
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Grid</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 1 *</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 2</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 3</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 4</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 5</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 6</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 7</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 8</a></li>
+                          <li role="presentation"><a role="menuitem" tabindex="-1" href="#">House 9</a></li>
+                      </ul>
+                  </div>
+                  
+                  <div class='legend'>
+                    <span class='actual'>ACTUAL</span>
+                    <span class='prediction'>PREDICTED</span>
+                  </div>
                 </div>
                 <svg class='smart-grid-load-chart'></svg>
             </div>
