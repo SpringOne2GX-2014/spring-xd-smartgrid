@@ -1,2 +1,4 @@
-spring-xd-smartgrid
-===================
+springxd-smartgrid-demo
+=======================
+
+springxd-smartgrid-demo
