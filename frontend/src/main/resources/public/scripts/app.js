@@ -6,7 +6,7 @@ var appData = {
 
     , minDate : new Date("2013-09-01T06:00:00.000Z")
     , maxDate: new Date("2013-09-01T14:30:00.000Z")
-    , requestTimeIncrementInMinutes: 5
+    , requestTimeIncrementInMinutes: 1
     , gridKey : "h_-1"
 
     , houses: [

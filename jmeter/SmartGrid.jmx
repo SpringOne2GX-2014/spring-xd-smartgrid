@@ -35,6 +35,7 @@
         <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
           <boolProp name="ResultCollector.error_logging">false</boolProp>
           <objProp>
+            <name>saveConfig</name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
@@ -61,6 +62,7 @@
             </value>
           </objProp>
           <objProp>
+            <name></name>
             <value class="SampleSaveConfiguration">
               <time>true</time>
               <latency>true</latency>
@@ -99,14 +101,14 @@
               <collectionProp name="Arguments.arguments">
                 <elementProp name="" elementType="HTTPArgument">
                   <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                  <stringProp name="Argument.value">{&quot;id&quot;:${id},&#xd;
-&quot;timestamp&quot;: ${timestamp},&#xd;
-&quot;timestamp_c&quot;: &quot;${__BeanShell(new java.text.SimpleDateFormat(&quot;yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSS&apos;Z&apos;&quot;).format(new java.util.Date(${timestamp}*1000L)))}&quot;,&#xd;
+                  <stringProp name="Argument.value">{&#xd;
+&quot;ts&quot;: ${timestamp},&#xd;
+&quot;dateTime&quot;: &quot;${__BeanShell(new java.text.SimpleDateFormat(&quot;yyyy-MM-dd&apos;T&apos;HH:mm:ss.SSS&apos;Z&apos;&quot;).format(new java.util.Date(${timestamp}*1000L)))}&quot;,&#xd;
 &quot;value&quot;: ${value}, &#xd;
 &quot;property&quot; : ${property}, &#xd;
-&quot;plug_id&quot; : ${plug_id}, &#xd;
-&quot;household_id&quot;: ${household_id},&#xd;
-&quot;house_id&quot;: ${house_id}}</stringProp>
+&quot;plug&quot; : ${plug_id}, &#xd;
+&quot;household&quot;: ${household_id},&#xd;
+&quot;house&quot;: ${house_id}}</stringProp>
                   <stringProp name="Argument.metadata">=</stringProp>
                 </elementProp>
               </collectionProp>
@@ -127,11 +129,21 @@
             <boolProp name="HTTPSampler.monitor">false</boolProp>
             <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
           </HTTPSamplerProxy>
-          <hashTree/>
+          <hashTree>
+            <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="HTTP Header Manager" enabled="true">
+              <collectionProp name="HeaderManager.headers">
+                <elementProp name="" elementType="Header">
+                  <stringProp name="Header.name">Content-Type</stringProp>
+                  <stringProp name="Header.value">application/json</stringProp>
+                </elementProp>
+              </collectionProp>
+            </HeaderManager>
+            <hashTree/>
+          </hashTree>
           <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
             <stringProp name="delimiter">,</stringProp>
             <stringProp name="fileEncoding"></stringProp>
-            <stringProp name="filename">agg_load_min_by_h_hh_p.csv</stringProp>
+            <stringProp name="filename">house28.csv</stringProp>
             <boolProp name="quotedData">false</boolProp>
             <boolProp name="recycle">false</boolProp>
             <stringProp name="shareMode">shareMode.all</stringProp>
@@ -148,7 +160,7 @@
   next = ${timestamp}L * 1000;  // the next timestamp in file, ms since epoch
   firstTS = ${firstTS}L * 1000; // the first timestamp in file, ms since epoch
 
-  ff = 960; // How fast to replay values (1 = real time, 60 = 60x faster, etc)
+  ff = 60; // How fast to replay values (1 = real time, 60 = 60x faster, etc)
 
 sleep =  ((next - firstTS) - (now - start)*ff) / ff; // OK to return &lt;0 sleep
 
