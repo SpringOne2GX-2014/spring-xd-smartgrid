@@ -2,6 +2,8 @@ package io.pivotal.demo.smartgrid.frontend.timeseries;
 
 import io.pivotal.demo.smartgrid.frontend.TimeSeriesDataRequest;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -11,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,21 +31,48 @@ public class AggregateCounterTimeSeriesRepository implements TimeSeriesRepositor
 
 	private static final Logger LOG = LoggerFactory.getLogger(AggregateCounterTimeSeriesRepository.class);
 
-	private static final String AGGREGATE_COUNTER_URL = "http://localhost:9393/metrics/aggregate-counters";
-
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	@Value("${smartgrid.frontend.aggregateCounterUrl}")
-	private String aggregateCounterUrl = AGGREGATE_COUNTER_URL;
+	@Value("${xdServerBaseUrl}") private String xdServerBaseUrl;
+
+	@Value("${aggregateCounterUrlPattern}") private String aggregateCounterUrlPattern;
+
+	@PostConstruct
+	public void init() {
+		pingXdServer();
+	}
+
+	private void pingXdServer() {
+		try {
+			HttpURLConnection con = (HttpURLConnection) new URL(xdServerBaseUrl).openConnection();
+			con.setRequestMethod("HEAD");
+
+			int timeout = 2000;
+
+			con.setReadTimeout(timeout);
+			con.setConnectTimeout(timeout);
+
+			int responseCode = con.getResponseCode();
+			
+			if (responseCode != HttpURLConnection.HTTP_OK) {
+				LOG.error("Bad response from server: {} Response: {}", xdServerBaseUrl, responseCode);
+			}
+		} catch (Exception ex) {
+			LOG.error("Could not connect to server: {} Error: {}: {}", xdServerBaseUrl, ex.getClass().getSimpleName(), ex.getMessage());
+		}
+	}
 
 	@Override
 	public Map<String, TimeSeriesCollection> getTimeSeriesData(TimeSeriesDataRequest dataRequest) {
 
 		int houseId = dataRequest.getHouseId();
 
-		IntStream houseNumStream = houseId == GRID_HOUSE_ID ? IntStream.rangeClosed(HOUSE_ID_MIN, HOUSE_ID_MAX) : IntStream.of(houseId);
+		IntStream houseNumStream = houseId == GRID_HOUSE_ID ? IntStream.rangeClosed(HOUSE_ID_MIN, HOUSE_ID_MAX) : IntStream
+				.of(houseId);
 
-		List<AggregateCounterCollection> aggregateCounterCollections = houseNumStream.parallel().mapToObj(i -> new TimeSeriesDataRequest(dataRequest, i)).map(this::fetchAggregateCounterData).filter(acc -> acc != null && !acc.getAggregateCounters().isEmpty()).collect(Collectors.toList());
+		List<AggregateCounterCollection> aggregateCounterCollections = houseNumStream.parallel()
+				.mapToObj(i -> new TimeSeriesDataRequest(dataRequest, i)).map(this::fetchAggregateCounterData)
+				.filter(acc -> acc != null && !acc.getAggregateCounters().isEmpty()).collect(Collectors.toList());
 
 		Map<String, TimeSeriesCollection> result = new HashMap<>();
 		for (AggregateCounterCollection acc : aggregateCounterCollections) {
@@ -49,47 +80,49 @@ public class AggregateCounterTimeSeriesRepository implements TimeSeriesRepositor
 			TimeSeriesCollection tsc = convertToTimeSeriesCollection(acc);
 			result.put(tsc.getName(), tsc);
 		}
-		
+
 		TimeSeriesCollection totalGridTimeSeriesCollection = aggreagteGridTotalTimeSeries(result);
-		
-		result.put("h_-1", totalGridTimeSeriesCollection); 
+
+		result.put("h_-1", totalGridTimeSeriesCollection);
 
 		return result;
 	}
 
 	private TimeSeriesCollection aggreagteGridTotalTimeSeries(Map<String, TimeSeriesCollection> result) {
 		TimeSeriesCollection totalGridTimeSeriesCollection = new TimeSeriesCollection("grid_h-1");
-		
-		for(Map.Entry<String, TimeSeriesCollection> entry : result.entrySet()) {
-			
+
+		for (Map.Entry<String, TimeSeriesCollection> entry : result.entrySet()) {
+
 			TimeSeriesCollection timeSeriesCollection = entry.getValue();
-			
-			if(totalGridTimeSeriesCollection.getTimeSeries().isEmpty()) {
-				
-				for(TimeSeries timeSeries : timeSeriesCollection.getTimeSeries()) {
-					
-					TimeSeries newTimeSeries = new TimeSeries("grid" + timeSeries.getName(), new ArrayList<DataPoint>(timeSeries.getData()));
+
+			if (totalGridTimeSeriesCollection.getTimeSeries().isEmpty()) {
+
+				for (TimeSeries timeSeries : timeSeriesCollection.getTimeSeries()) {
+
+					TimeSeries newTimeSeries = new TimeSeries("grid" + timeSeries.getName(), new ArrayList<DataPoint>(
+							timeSeries.getData()));
 					totalGridTimeSeriesCollection.getTimeSeries().add(newTimeSeries);
 				}
-				
+
 				continue;
 			}
-			
+
 			List<TimeSeries> timeSeriesList = timeSeriesCollection.getTimeSeries();
-			for(int timeSeriesIndex = 0, timeSeriesCount = timeSeriesList.size(); timeSeriesIndex < timeSeriesCount; timeSeriesIndex++) {
-				
+			for (int timeSeriesIndex = 0, timeSeriesCount = timeSeriesList.size(); timeSeriesIndex < timeSeriesCount; timeSeriesIndex++) {
+
 				TimeSeries timeSeries = timeSeriesList.get(timeSeriesIndex);
 				TimeSeries gridTimeSeries = totalGridTimeSeriesCollection.getTimeSeries().get(timeSeriesIndex);
-				
+
 				List<DataPoint> gridDataPoints = gridTimeSeries.getData();
 				List<DataPoint> currentDataPoints = timeSeries.getData();
-				
-				for(int dataPointIndex = 0, dataPointCount = currentDataPoints.size(); dataPointIndex < dataPointCount;dataPointIndex++) {
-					
+
+				for (int dataPointIndex = 0, dataPointCount = currentDataPoints.size(); dataPointIndex < dataPointCount; dataPointIndex++) {
+
 					DataPoint currentDataPoint = currentDataPoints.get(dataPointIndex);
 					DataPoint gridDataPoint = gridDataPoints.get(dataPointIndex);
-					
-					gridDataPoints.set(dataPointIndex, new DataPoint(gridDataPoint.getTs(), gridDataPoint.getValue() + currentDataPoint.getValue()));
+
+					gridDataPoints.set(dataPointIndex, new DataPoint(gridDataPoint.getTs(), gridDataPoint.getValue()
+							+ currentDataPoint.getValue()));
 				}
 			}
 		}
@@ -126,25 +159,25 @@ public class AggregateCounterTimeSeriesRepository implements TimeSeriesRepositor
 
 	private String makeAggregateCounterUrl(TimeSeriesType timeSeriesType, TimeSeriesDataRequest dataRequest) {
 
-		String aggregateCounterUrl = AGGREGATE_COUNTER_URL + "/smartgrid_" + makeHouseKey(dataRequest.getHouseId()) + "_load_" + timeSeriesType.name().toLowerCase();
+		String baseUrl = String.format(aggregateCounterUrlPattern, xdServerBaseUrl, dataRequest.getHouseId(),
+				timeSeriesType.name().toLowerCase());
 
-		UriComponentsBuilder ucb = UriComponentsBuilder.fromHttpUrl(aggregateCounterUrl)
+		UriComponentsBuilder ucb = UriComponentsBuilder.fromHttpUrl(baseUrl)
 				.queryParam("resolution", dataRequest.getResolution().name().toLowerCase())
-				.queryParam("from", dataRequest.getFromDateTime())
-				.queryParam("to", dataRequest.getToDateTime());
+				.queryParam("from", dataRequest.getFromDateTime()).queryParam("to", dataRequest.getToDateTime());
 
 		String url = ucb.build().toString();
 
 		return url;
 	}
 
-
 	private AggregateCounterCollection fetchAggregateCounterData(TimeSeriesDataRequest request) {
 
 		AggregateCounterCollection acc = new AggregateCounterCollection(makeHouseKey(request.getHouseId()));
 
 		try {
-			AggregateCounter ac = restTemplate.getForObject(makeAggregateCounterUrl(TimeSeriesType.ACTUAL, request), AggregateCounter.class);
+			AggregateCounter ac = restTemplate.getForObject(makeAggregateCounterUrl(TimeSeriesType.ACTUAL, request),
+					AggregateCounter.class);
 			if (ac != null) {
 				acc.register(ac.getName(), ac);
 			}
@@ -155,7 +188,8 @@ public class AggregateCounterTimeSeriesRepository implements TimeSeriesRepositor
 		}
 
 		try {
-			AggregateCounter ac = restTemplate.getForObject(makeAggregateCounterUrl(TimeSeriesType.PREDICTED, request), AggregateCounter.class);
+			AggregateCounter ac = restTemplate.getForObject(makeAggregateCounterUrl(TimeSeriesType.PREDICTED, request),
+					AggregateCounter.class);
 			if (ac != null) {
 				acc.register(ac.getName(), ac);
 			}
@@ -170,13 +204,5 @@ public class AggregateCounterTimeSeriesRepository implements TimeSeriesRepositor
 
 	private String makeHouseKey(int houseId) {
 		return "h_" + houseId;
-	}
-
-	public String getAggregateCounterUrl() {
-		return aggregateCounterUrl;
-	}
-
-	public void setAggregateCounterUrl(String aggregateCounterUrl) {
-		this.aggregateCounterUrl = aggregateCounterUrl;
 	}
 }
