@@ -34,11 +34,11 @@ start xd-singlenode
 start xd-shell
 
 ```
-stream create smartgrid_ingestion --definition "http | file" --deploy
+stream create ingest --definition "http | hdfs" --deploy
 
-stream create smartgrid_load_timeseries_actual --definition "tap:stream:smartgrid_ingestion > aggregate-counter --timeField=payload.dateTime.toString() --incrementExpression=(T(java.lang.Double).parseDouble(payload.value.toString()))/60 --nameExpression='smartgrid_h_'+payload.house+'_load_actual'" --deploy
+stream create count --definition "tap:stream:ingest > aggregate-counter --timeField=payload.dateTime.toString() --incrementExpression=(T(java.lang.Double).parseDouble(payload.value.toString()))/60 --nameExpression='smartgrid_h_'+payload.house+'_load_actual'" --deploy
 
-stream create smartgrid_load_timeseries_predicted --definition "tap:stream:smartgrid_ingestion >  analytic-pmml --inputType=application/x-xd-tuple --location=/tmp/nn.pmml --inputFieldMapping='ts:timestamp,house:house' | aggregate-counter --timeField=payload.dateTime.toString() --incrementExpression=T(java.lang.Double).parseDouble(payload.FinalResult.toString())/60 --nameExpression='smartgrid_h_'+payload.house+'_load_predicted'" --deploy
+stream create predict --definition "tap:stream:ingest > analytic-pmml --inputType=application/x-xd-tuple --location=/home/ubuntu/spring-xd-1.0.1.BUILD-SNAPSHOT/xd/lib/metaModel.pmml --inputFieldMapping='ts:timestamp,house:house' | aggregate-counter --timeField=payload.dateTime.toString() --incrementExpression=T(java.lang.Double).parseDouble(payload.FinalResult.toString())/60 --nameExpression='smartgrid_h_'+payload.house+'_load_predicted'"
 ```                           
 
 To speed up the ingestion one could replace the `log` sink with a `null` sink that looks like this:
