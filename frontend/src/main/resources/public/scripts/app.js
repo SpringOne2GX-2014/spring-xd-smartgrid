@@ -1,11 +1,17 @@
 //
 
+// TZ workaround for now
+var offset = -(new Date().getTimezoneOffset()/60);
+var sOffset = offset < 0 ? "-" : "+";
+sOffset += offset.length == 2 ? Math.abs(offset) : "0" + Math.abs(offset);
+sOffset += ":00";
+
 var appData = {
 
     currentHouseSelection: -1
 
-    , minDate : new Date("2013-09-01T06:00:00.000Z")
-    , maxDate: new Date("2013-09-01T14:30:00.000Z")
+    , minDate : new Date("2013-09-01T00:00:00.000" + sOffset)
+    , maxDate: new Date("2013-09-01T14:30:00.000" + sOffset)
     , requestTimeIncrementInMinutes: 1
     , gridKey : "h_-1"
 
