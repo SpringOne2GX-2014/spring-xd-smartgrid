@@ -9,7 +9,7 @@
         <collectionProp name="Arguments.arguments">
           <elementProp name="firstTS" elementType="Argument">
             <stringProp name="Argument.name">firstTS</stringProp>
-            <stringProp name="Argument.value">1377986401</stringProp>
+            <stringProp name="Argument.value">${__property(FIRST_TS,FIRST_TS)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="LB_HOST" elementType="Argument">
@@ -175,7 +175,7 @@
   next = ${timestamp}L * 1000;  // the next timestamp in file, ms since epoch
   firstTS = ${firstTS}L * 1000; // the first timestamp in file, ms since epoch
 
-  ff = 60; // How fast to replay values (1 = real time, 60 = 60x faster, etc)
+  ff = 20; // How fast to replay values (1 = real time, 60 = 60x faster, etc)
 
 sleep =  ((next - firstTS) - (now - start)*ff) / ff; // OK to return &lt;0 sleep
 
